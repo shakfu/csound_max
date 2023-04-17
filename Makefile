@@ -1,28 +1,28 @@
 SCRIPTS := source/scripts
 
 
-.PHONY: build deps fixup clean setup release
+.PHONY: cmake-default cmake-relocatable relocatable deps fixup clean setup 
 
-all: build
+all: cmake-default
 
 
-build:
+cmake-default:
 	@mkdir -p build && cd build && cmake .. && make
 
 
-static: fixup
+relocatable: fixup
 
 
 deps:
 	@bash $(SCRIPTS)/build_dependencies.sh
 
 
-fixup: relocatable
+fixup: cmake-relocatable
 	@bash $(SCRIPTS)/fix_bundle.sh
 
 
-relocatable: deps
-	mkdir -p build && cd build && cmake -DBUILD_RELOCATABLE=ON .. && make
+cmake-relocatable: deps
+	@mkdir -p build && cd build && cmake -DBUILD_RELOCATABLE=ON .. && make
 
 
 clean:
@@ -30,4 +30,6 @@ clean:
 
 
 setup:
+	git submodule init
+	git submodule update
 	ln -s $(shell pwd) "$(HOME)/Documents/Max 8/Packages/$(shell basename `pwd`)"
