@@ -12,14 +12,13 @@ __pycache__
 *.sdf
 *.sln
 *.suo
-#*.swo
+*.swo
 .DS_Store
 .mypy_cache
 .pytest_cache
 .vs
 .vscode
 
-archive
 build
 notes
 dist
