@@ -1,52 +1,66 @@
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-sdk-base/script/max-pretarget.cmake)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required(VERSION 3.19)
 
-#############################################################
-# MAX EXTERNAL
-#############################################################
+string(REGEX REPLACE "(.*)/" "" THIS_FOLDER_NAME "${CMAKE_CURRENT_SOURCE_DIR}")
+project(${THIS_FOLDER_NAME})
 
-# the below is not working on Mac for me so finding and specifying 
-# header and library explicitly
-#find_package(Csound)
+option(C74_BUILD_FAT "Build Universal Externals")
 
-if(APPLE)
-    find_path(CSOUND_HEADER_PATH csound.h)
-    find_library(CSOUND_LIBRARY CsoundLib64)
-else()
-    find_path(CSOUND_HEADER_PATH csound/csound.h)
-    find_library(CSOUND_LIBRARY csound64.lib)
+
+if (APPLE)
+    if (${CMAKE_GENERATOR} MATCHES "Xcode")
+            if (${XCODE_VERSION} VERSION_LESS 10)
+                message(STATUS "Xcode 10 or higher is required. Please install from the Mac App Store.")
+                return ()
+            # elseif(${XCODE_VERSION} VERSION_GREATER_EQUAL 12)
+            #     set(C74_BUILD_FAT YES)
+            endif ()
+    endif ()
+
+    if (NOT CMAKE_OSX_ARCHITECTURES)
+        if(C74_BUILD_FAT)
+            set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "macOS architecture" FORCE)
+        else()
+            set(CMAKE_OSX_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR} CACHE STRING "macOS architecture" FORCE)
+        endif()
+        message("CMAKE_OSX_ARCHITECTURES set to ${CMAKE_OSX_ARCHITECTURES}")
+    endif()
 endif()
 
-if(CSOUND_HEADER_PATH)
-    MESSAGE("found csound header path: ${CSOUND_HEADER_PATH}")
-else()
-    MESSAGE(FATAL_ERROR "could not find csound header path")
+set(local_prefix "/usr/local")
+if(CMAKE_HOST_APPLE) # i.e if is_macos check if homebrew is used aand if so get prefix
+    execute_process(
+        COMMAND brew --prefix
+        OUTPUT_VARIABLE homebrew_prefix
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(DEFINED homebrew_prefix)
+        set(local_prefix ${homebrew_prefix})
+    endif()
 endif()
-    
-if(CSOUND_LIBRARY)
-  MESSAGE("found csound library path: ${CSOUND_LIBRARY}")
-else()
-  MESSAGE(FATAL_ERROR "could not find csound library path")
-endif()
 
-include_directories( 
-  "${MAX_SDK_INCLUDES}"
-  "${MAX_SDK_MSP_INCLUDES}"
-  "${MAX_SDK_JIT_INCLUDES}"
-  "${CSOUND_HEADER_PATH}"
-)
+MACRO(SUBDIRLIST result curdir)
+  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  SET(dirlist "")
+  FOREACH(child ${children})
+    IF(IS_DIRECTORY ${curdir}/${child})
+        LIST(APPEND dirlist ${child})
+    ENDIF()
+  ENDFOREACH()
+  SET(${result} ${dirlist})
+ENDMACRO()
 
-link_libraries(${CSOUND_LIBRARY})
+# Generate a project for every folder in the "source/category" folder
+SUBDIRLIST(CATEGORY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/source)
+foreach (cat_dir ${CATEGORY_DIRS})
+  SUBDIRLIST(PROJECT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/source/${cat_dir})
+  foreach (project_dir ${PROJECT_DIRS})
+    set(project_path ${CMAKE_CURRENT_SOURCE_DIR}/source/${cat_dir}/${project_dir})
+    message("checking in: ${project_path}")
+    if (EXISTS "${project_path}/CMakeLists.txt")
+      message("Generating: ${project_dir}")
+      add_subdirectory(${project_path})
+    endif ()
+  endforeach ()
+endforeach ()
 
-file(GLOB PROJECT_SRC
-   "*.h"
-   "*.c"
-   "*.cpp"
-)
-add_library( 
-  ${PROJECT_NAME} 
-  MODULE
-  ${PROJECT_SRC}
-)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-sdk-base/script/max-posttarget.cmake)
