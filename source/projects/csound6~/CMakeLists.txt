@@ -66,11 +66,6 @@ if(NOT BUILD_RELOCATABLE)
 
     else()
 
-    # execute_process (
-    #     COMMAND ${CMAKE_SOURCE_DIR}/source/scripts/build_dependencies.sh ${CMAKE_SOURCE_DIR}
-    #     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    # )
-
     set(DEPS ${CMAKE_BINARY_DIR}/deps)
     set(CSOUND_LIBRARY ${DEPS}/csound-build/libCsoundLib64.a)
     set(CSOUND_HEADER_PATH ${DEPS}/csound-build/CsoundLib64.framework/Headers)
@@ -115,19 +110,6 @@ if(NOT BUILD_RELOCATABLE)
         -lcurl
         "-framework Accelerate"
     )
-
-    # ./build/deps/macdylibbundler-build/dylibbundler -od -x externals/csound6~.mxo/Contents/MacOS/csound6~ -d externals/csound6~.mxo/Contents/Frameworks -p @loader_path/../Frameworks
-    # add_custom_command(
-    #     TARGET ${PROJECT_NAME}
-    #     POST_BUILD
-    #     COMMAND ${DEPS}/macdylibbundler-build/dylibbundler -od -b -x ${EXTERNAL_PATH}/Contents/MacOS/${PROJECT_NAME} -d ${EXTERNAL_PATH}/Contents/Frameworks -p @loader_path/../Frameworks
-    #     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    #     DEPENDS ${EXTERNAL_PATH}/Contents/MacOS/${PROJECT_NAME}
-    # )
-
-    # add_custom_target(fix_deps
-    #     DEPENDS ${EXTERNAL_PATH}/Contents/MacOS/${PROJECT_NAME}
-    # )
 
 endif()
 

@@ -6,17 +6,21 @@ The primary aim of the fork is to create a relocatable version of the `csound6~`
 
 Currently this is only available on macOS with a few differences from the main project:
 
-- This fork is only focused on macOS
+- This fork is only focused on macOS (tested on `x86_64` but no reason why it shoudn't work for `arm64`)
 
 - The project has been restructured as a subproject and `max-sdk-base` is now a git submodule
 
 - The original project README is now in the subproject folder. This README is now in the root of the project.
 
-- A `Makefile` 'frontend' has been added to run top-level steps.
+- A `Makefile` 'frontend' has been added to sequence top-level steps.
 
 - A `source/scripts` folder has been added with the following bash scripts:
 
-	- `build_dependencies.sh`: download and build `csound` as static library, and `macdylibbundler`, the bundle fixup tool.
+	- `build_dependencies.sh` which downloads and builds: 
+		
+		- `csound` as static library; and
+
+		- `macdylibbundler`, the bundle fixup tool.
 
 	- `fix_bundle.sh`: Move residual dylib dependencies to the bundle and fix the @rpath references
 
@@ -39,7 +43,7 @@ make
 
 ```
 
-Build the `csound6~` external with the relocatable option (i.e. for packages and standalones):
+Build the `csound6~` external with the relocatable option (i.e. uses csound static library for packages and standalones):
 
 
 ```bash
