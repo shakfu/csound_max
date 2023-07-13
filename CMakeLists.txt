@@ -26,15 +26,14 @@ if (APPLE)
     endif()
 endif()
 
-set(local_prefix "/usr/local")
 if(CMAKE_HOST_APPLE) # i.e if is_macos check if homebrew is used aand if so get prefix
     execute_process(
         COMMAND brew --prefix
-        OUTPUT_VARIABLE homebrew_prefix
+        OUTPUT_VARIABLE HOMEBREW_PREFIX
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    if(DEFINED homebrew_prefix)
-        set(local_prefix ${homebrew_prefix})
+    if(DEFINED HOMEBREW_PREFIX)
+        set(HAS_HOMEBREW 1)
     endif()
 endif()
 

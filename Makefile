@@ -1,13 +1,19 @@
 SCRIPTS := source/scripts
+CONFIG := "Release" # or Debug
+ 
+
+.PHONY: build release build-relocatable relocatable deps fixup clean reset setup 
 
 
-.PHONY: cmake-default cmake-relocatable relocatable deps fixup clean setup 
-
-all: cmake-default
+all: build
 
 
-cmake-default:
-	@mkdir -p build && cd build && cmake .. && make
+build:
+	@mkdir -p build && cd build && cmake -GXcode .. && \
+		cmake --build . --config '$(CONFIG)'
+
+
+release: relocatable
 
 
 relocatable: fixup
@@ -17,16 +23,26 @@ deps:
 	@bash $(SCRIPTS)/build_dependencies.sh
 
 
-fixup: cmake-relocatable
+fixup: build-relocatable
 	@bash $(SCRIPTS)/fix_bundle.sh
 
 
-cmake-relocatable: deps
-	@mkdir -p build && cd build && cmake -DBUILD_RELOCATABLE=ON .. && make
+fixup-tool:
+	@bash $(SCRIPTS)/fix_bundle.sh
+
+
+build-relocatable: deps
+# 	@mkdir -p build && cd build && cmake -DBUILD_RELOCATABLE=ON .. && make
+	@mkdir -p build && cd build && cmake -GXcode -DBUILD_RELOCATABLE=ON .. && \
+		cmake --build . --config '$(CONFIG)'
 
 
 clean:
 	@rm -rf build
+
+
+reset: clean
+	@rm -rf externals
 
 
 setup:

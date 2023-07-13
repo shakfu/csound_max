@@ -4,6 +4,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 #############################################################
 # MAX EXTERNAL
 #############################################################
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13 CACHE STRING "force it" FORCE)
 
 option(BUILD_RELOCATABLE OFF "builds relocatable macOS bundle")
 
@@ -31,7 +32,7 @@ if(NOT BUILD_RELOCATABLE)
 
     # the below is not working on Mac for me so finding and specifying 
     # header and library explicitly
-    find_package(Csound)
+    # find_package(Csound)
 
     if(APPLE)
         find_path(CSOUND_HEADER_PATH csound.h)
@@ -57,7 +58,6 @@ if(NOT BUILD_RELOCATABLE)
         PUBLIC
         ${CSOUND_HEADER_PATH}
     )
-
 
     target_link_libraries(${PROJECT_NAME}
         PUBLIC
@@ -95,11 +95,12 @@ if(NOT BUILD_RELOCATABLE)
     target_include_directories(${PROJECT_NAME}
         PUBLIC
         ${CSOUND_HEADER_PATH}
+        $<${HAS_HOMEBREW}:${HOMEBREW_PREFIX}>/include
     )
 
     target_link_directories(${PROJECT_NAME}
         PUBLIC
-        /usr/local/lib
+        $<${HAS_HOMEBREW}:${HOMEBREW_PREFIX}>/lib
     )
 
     target_link_libraries(${PROJECT_NAME}
